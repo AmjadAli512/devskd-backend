@@ -1,0 +1,4 @@
+$kind: http-request
+url: http://localhost:3000/notes/6a90b0a8d38122e9d26afd0a
+method: DELETE
+order: 4431084637964508
