@@ -1,7 +1,7 @@
 # Dependencies
 node_modules/
 
-# Environment variables
+# Environment variables (CRITICAL - never commit)
 .env
 .env.local
 .env.*.local
@@ -24,4 +24,4 @@ desktop.ini
 *.swo
 
 # Postman (optional – remove if you want to keep collections)
-# postman/
+postman/

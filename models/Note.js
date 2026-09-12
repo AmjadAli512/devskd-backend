@@ -14,9 +14,15 @@ const noteSchema = new mongoose.Schema({
     trim: true,
     minlength: [1, 'Content must be at least 1 character'],
     maxlength: [5000, 'Content cannot exceed 5000 characters']
+  },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+    index: true  // index for faster per-user queries
   }
 }, {
-  timestamps: true  // Automatically adds createdAt & updatedAt
+  timestamps: true
 });
 
 module.exports = mongoose.model('Note', noteSchema);
