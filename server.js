@@ -4,6 +4,8 @@ const cors = require('cors');
 const connectDB = require('./config/db');
 const authRouter = require('./routes/auth');
 const notesRouter = require('./routes/notes');
+const servicesRouter = require('./routes/services');
+const contactRouter = require('./routes/contact');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -24,10 +26,12 @@ app.use((req, res, next) => {
 // Routes
 app.use('/auth', authRouter);   // 🆕 public auth routes
 app.use('/notes', notesRouter); // 🔒 protected notes routes
+app.use('/services', servicesRouter);
+app.use('/contact', contactRouter);
 
 // Root route (nice-to-have)
 app.get('/', (req, res) => {
-  res.json({ message: 'Notes API with Auth. Use /auth/signup or /auth/login.' });
+  res.json({ message: 'DevSKD API. Use /auth/signup or /auth/login to get started.' });
 });
 
 // 404 handler
