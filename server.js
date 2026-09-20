@@ -13,6 +13,11 @@ const PORT = process.env.PORT || 3000;
 // Connect to MongoDB
 connectDB();
 
+// Health check for Railway
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', uptime: process.uptime() });
+});
+
 // CORS configuration
 const allowedOrigins = [
   'http://localhost:3001',
@@ -21,7 +26,7 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin) return callback(null, true); // Postman, curl, etc.
+    if (!origin) return callback(null, true); // Allows Postman, curl, etc.
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
@@ -66,6 +71,6 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
 });
