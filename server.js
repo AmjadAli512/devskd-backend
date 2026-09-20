@@ -13,8 +13,23 @@ const PORT = process.env.PORT || 3000;
 // Connect to MongoDB
 connectDB();
 
-// Middleware
-app.use(cors());
+// CORS configuration
+const allowedOrigins = [
+  'http://localhost:3001',
+  process.env.CLIENT_URL
+].filter(Boolean);
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true); // Postman, curl, etc.
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true
+}));
+
 app.use(express.json());
 
 // Logging middleware
@@ -23,13 +38,18 @@ app.use((req, res, next) => {
   next();
 });
 
+// Health check (for Railway)
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', uptime: process.uptime() });
+});
+
 // Routes
-app.use('/auth', authRouter);   // 🆕 public auth routes
-app.use('/notes', notesRouter); // 🔒 protected notes routes
+app.use('/auth', authRouter);
+app.use('/notes', notesRouter);
 app.use('/services', servicesRouter);
 app.use('/contact', contactRouter);
 
-// Root route (nice-to-have)
+// Root route
 app.get('/', (req, res) => {
   res.json({ message: 'DevSKD API. Use /auth/signup or /auth/login to get started.' });
 });
