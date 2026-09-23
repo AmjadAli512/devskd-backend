@@ -16,8 +16,10 @@ const authMiddleware = (req, res, next) => {
     // 4. Verify the token with the secret
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // 5. Attach userId to req so routes can use it
-    req.userId = decoded.userId;
+    // 5. Attach userId and role to req so routes can use them
+    const { userId, role } = decoded;
+    req.userId = userId;
+    req.userRole = role;
 
     // 6. Pass control to the route
     next();

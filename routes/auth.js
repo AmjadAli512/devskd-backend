@@ -6,9 +6,9 @@ const User = require('../models/User');
 const router = express.Router();
 
 // Helper: generate a JWT for a user
-const generateToken = (userId) => {
+const generateToken = (userId, role) => {
   return jwt.sign(
-    { userId },
+    { userId, role },
     process.env.JWT_SECRET,
     { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
   );
@@ -42,18 +42,20 @@ router.post('/signup', async (req, res) => {
     // 4. Create user
     const user = await User.create({
       email: email.toLowerCase().trim(),
-      password: hashedPassword
+      password: hashedPassword,
+      role: 'user'
     });
 
     // 5. Generate JWT
-    const token = generateToken(user._id);
+    const token = generateToken(user._id, user.role);
 
     // 6. Respond (never send the password hash)
     res.status(201).json({
       token,
       user: {
         id: user._id,
-        email: user.email
+        email: user.email,
+        role: user.role
       }
     });
   } catch (error) {
@@ -88,14 +90,15 @@ router.post('/login', async (req, res) => {
     }
 
     // 4. Generate JWT
-    const token = generateToken(user._id);
+    const token = generateToken(user._id, user.role);
 
     // 5. Respond
     res.status(200).json({
       token,
       user: {
         id: user._id,
-        email: user.email
+        email: user.email,
+        role: user.role
       }
     });
   } catch (error) {

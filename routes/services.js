@@ -1,21 +1,16 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const Service = require('../models/Service');
 const authMiddleware = require('../middleware/auth');
+const adminOnly = require('../middleware/adminOnly');
 
 const router = express.Router();
-
-// ------------------------------------------------
-// Apply auth middleware to ALL routes below
-// ------------------------------------------------
-router.use(authMiddleware);
 
 // ------------------------------------------------
 // GET /services - Get all services for logged-in user
 // ------------------------------------------------
 router.get('/', async (req, res) => {
   try {
-    const services = await Service.find({ userId: req.userId }).sort({ createdAt: -1 });
+    const services = await Service.find().sort({ createdAt: -1 });
     res.json(services);
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
@@ -25,11 +20,9 @@ router.get('/', async (req, res) => {
 // ------------------------------------------------
 // GET /services/stats - Get service statistics for logged-in user
 // ------------------------------------------------
-router.get('/stats', async (req, res) => {
+router.get('/stats', authMiddleware, adminOnly, async (req, res) => {
   try {
-    const userId = new mongoose.Types.ObjectId(req.userId);
     const [stats] = await Service.aggregate([
-      { $match: { userId } },
       {
         $facet: {
           total: [{ $count: 'count' }],
@@ -66,10 +59,7 @@ router.get('/stats', async (req, res) => {
 // ------------------------------------------------
 router.get('/:id', async (req, res) => {
   try {
-    const service = await Service.findOne({
-      _id: req.params.id,
-      userId: req.userId
-    });
+    const service = await Service.findById(req.params.id);
 
     if (!service) {
       return res.status(404).json({ error: 'Service not found' });
@@ -86,7 +76,7 @@ router.get('/:id', async (req, res) => {
 // ------------------------------------------------
 // POST /services - Create a new service for logged-in user
 // ------------------------------------------------
-router.post('/', async (req, res) => {
+router.post('/', authMiddleware, adminOnly, async (req, res) => {
   try {
     const { title, description, shortDescription, icon, featured } = req.body;
 
@@ -118,7 +108,7 @@ router.post('/', async (req, res) => {
 // ------------------------------------------------
 // PUT /services/:id - Update a service (owned by user)
 // ------------------------------------------------
-router.put('/:id', async (req, res) => {
+router.put('/:id', authMiddleware, adminOnly, async (req, res) => {
   try {
     const { title, description, shortDescription, icon, featured } = req.body;
 
@@ -132,8 +122,8 @@ router.put('/:id', async (req, res) => {
       return res.status(400).json({ error: 'Short description is required' });
     }
 
-    const service = await Service.findOneAndUpdate(
-      { _id: req.params.id, userId: req.userId },  // only owner can update
+    const service = await Service.findByIdAndUpdate(
+      req.params.id,
       {
         title: title.trim(),
         description: description.trim(),
@@ -159,12 +149,9 @@ router.put('/:id', async (req, res) => {
 // ------------------------------------------------
 // DELETE /services/:id - Delete a service (owned by user)
 // ------------------------------------------------
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authMiddleware, adminOnly, async (req, res) => {
   try {
-    const service = await Service.findOneAndDelete({
-      _id: req.params.id,
-      userId: req.userId  // only owner can delete
-    });
+    const service = await Service.findByIdAndDelete(req.params.id);
 
     if (!service) {
       return res.status(404).json({ error: 'Service not found' });

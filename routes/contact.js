@@ -1,6 +1,7 @@
 const express = require('express');
 const Contact = require('../models/Contact');
 const authMiddleware = require('../middleware/auth');
+const adminOnly = require('../middleware/adminOnly');
 
 const router = express.Router();
 
@@ -40,7 +41,7 @@ router.post('/', async (req, res) => {
 // ------------------------------------------------
 // GET /contact - Get all contact submissions
 // ------------------------------------------------
-router.get('/', authMiddleware, async (req, res) => {
+router.get('/', authMiddleware, adminOnly, async (req, res) => {
   try {
     const contacts = await Contact.find().sort({ createdAt: -1 });
     res.json(contacts);
@@ -52,7 +53,7 @@ router.get('/', authMiddleware, async (req, res) => {
 // ------------------------------------------------
 // GET /contact/:id - Get a single contact submission
 // ------------------------------------------------
-router.get('/:id', authMiddleware, async (req, res) => {
+router.get('/:id', authMiddleware, adminOnly, async (req, res) => {
   try {
     const contact = await Contact.findById(req.params.id);
 
@@ -71,7 +72,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
 // ------------------------------------------------
 // PATCH /contact/:id/status - Update contact status
 // ------------------------------------------------
-router.patch('/:id/status', authMiddleware, async (req, res) => {
+router.patch('/:id/status', authMiddleware, adminOnly, async (req, res) => {
   try {
     const { status } = req.body;
 
@@ -100,7 +101,7 @@ router.patch('/:id/status', authMiddleware, async (req, res) => {
 // ------------------------------------------------
 // DELETE /contact/:id - Delete a contact submission
 // ------------------------------------------------
-router.delete('/:id', authMiddleware, async (req, res) => {
+router.delete('/:id', authMiddleware, adminOnly, async (req, res) => {
   try {
     const contact = await Contact.findByIdAndDelete(req.params.id);
 
